@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8" />
+		<title>🌜Moon Viewer🌛</title>
+		<meta
+			name="viewport"
+			content="initial-scale=1,maximum-scale=1,user-scalable=no"
+		/>
+		<!-- MapLibreの本体JSとCSSを読み込む -->
+		<script src="https://unpkg.com/maplibre-gl@5.0.0-pre.10/dist/maplibre-gl.js"></script>
+		<link
+			href="https://unpkg.com/maplibre-gl@5.0.0-pre.10/dist/maplibre-gl.css"
+			rel="stylesheet"
+		/>
+		<style>
+			body {
+				margin: 0;
+				padding: 0;
+				background-color: #222;
+			}
+			#map {
+				position: absolute;
+				top: 0;
+				bottom: 0;
+				width: 100%;
+			}
+		</style>
+	</head>
+	<body>
+		<!-- 地図を表示するためのdiv要素 -->
+		<div id="map"></div>
+
+		<script>
+			// ここからがMapLibre GL JSで月面を表示するためのコード
+			const map = new maplibregl.Map({
+				container: 'map',          // マップを表示するHTML要素のID
+				zoom: 2,                   // 初期ズームレベル
+				renderWorldCopies: false,  // 地球表現の場合は世界を繰り返し表示するが、月なのでオフ
+				projection: 'globe',       // 地図の投影方法として 'globe' を使用(3Dっぽい地球儀表現)
+				style: {
+					version: 8,
+					glyphs: 'mapbox://fonts/mapbox/{fontstack}/{range}.pbf',
+					sources: {
+						// 1) 月面表面画像(LROC)のタイルソース
+						surface: {
+							type: 'raster',
+							tiles: [
+								'https://tiles.spatialty.io/moon_surface/{z}/{x}/{y}.png',
+							],
+							tileSize: 256,
+							maxzoom: 7,
+							attribution:
+								'USGS/NASA: <a href="https://astrogeology.usgs.gov/search/map/Moon/LRO/LROC_WAC/Lunar_LRO_LROC-WAC_Mosaic_global_100m_June2013">Surface</a> | <a href="https://planetarynames.wr.usgs.gov/Page/MOON/target">Crater</a> | <a href="https://pgda.gsfc.nasa.gov/products/54">DEM</a>',
+						},
+						// 2) DEM タイル(raster-dem)で標高データを読み込むソース
+						terrain: {
+							type: 'raster-dem',
+							tiles: [
+								'https://tiles.spatialty.io/moon_terrain/{z}/{x}/{y}.png',
+							],
+							tileSize: 512,
+							maxzoom: 8,
+							bounds: [-180, -60, 180, 60], // DEMがカバーする範囲(緯度経度)
+						},
+						// Hillshade用にもうひとつrasterとして読んでいるソース(terrain2)
+						terrain2: {
+							type: 'raster',
+							tiles: [
+								'https://tiles.spatialty.io/moon_terrain/{z}/{x}/{y}.png',
+							],
+							tileSize: 512,
+							maxzoom: 8,
+							bounds: [-180, -60, 180, 60],
+						},
+						// 3) クレーター名(GeoJSON)
+						crater: {
+							type: 'geojson',
+							data: './cratername.geojson',
+						},
+					},
+					layers: [
+						// 月面表面画像のレイヤー
+						{
+							id: 'surface',
+							type: 'raster',
+							source: 'surface',
+							paint: {
+								'raster-fade-duration': 0,
+							},
+						},
+						// 小さめのクレーター名のラベル(ズーム5以上で表示)
+						{
+							id: 'crater',
+							type: 'symbol',
+							source: 'crater',
+							layout: {
+								'text-field': ['get', 'name'],        // クレーター名を表示
+								'text-font': ['Metropolis Bold'],
+								'text-size': 15,
+							},
+							paint: {
+								'text-color': 'white',
+								'text-halo-color': 'black',
+								'text-halo-width': 1,
+							},
+							minzoom: 5,
+						},
+						// 中くらいのサイズ(>100km)のクレーターを拡大表示(ズーム3.5以上)
+						{
+							id: 'crater-mid',
+							type: 'symbol',
+							source: 'crater',
+							layout: {
+								'text-field': ['get', 'name'],
+								'text-font': ['Metropolis Bold'],
+								'text-size': 17,
+							},
+							paint: {
+								'text-color': 'white',
+								'text-halo-color': 'black',
+								'text-halo-width': 1,
+							},
+							filter: ['>', ['get', 'diameter'], 100],
+							minzoom: 3.5,
+						},
+						// 大きなクレーター(>300km)はさらに大きい文字で表示
+						{
+							id: 'crater-big',
+							type: 'symbol',
+							source: 'crater',
+							layout: {
+								'text-field': ['get', 'name'],
+								'text-font': ['Metropolis Bold'],
+								'text-size': 20,
+							},
+							paint: {
+								'text-color': 'white',
+								'text-halo-color': 'black',
+								'text-halo-width': 1,
+							},
+							filter: ['>', ['get', 'diameter'], 300],
+						},
+					],
+					// terrainプロパティを使って3D起伏表現を有効化
+					terrain: {
+						source: 'terrain',        // raster-dem タイルのソース
+						exaggeration: 20,        // 高さの強調倍率(20倍)
+					},
+				},
+				maxPitch: 85, // カメラの傾斜角度の上限
+				maxZoom: 10,
+			});
+
+			// ツールバー(ズームイン・ズームアウト、回転など)
+			map.addControl(new maplibregl.NavigationControl());
+			// 全画面表示ボタン
+			map.addControl(new maplibregl.FullscreenControl());
+			// MapLibre のロゴを左下に配置
+			map.addControl(new maplibregl.LogoControl(), 'bottom-left');
+
+			// マップが読み込まれたときのイベント
+			map.on('load', () => map.setProjection({ type: 'globe' }));
+		</script>
+	</body>
+</html>

@@ -31,7 +31,7 @@
 		<script>
 			const map = new maplibregl.Map({
 				container: 'map',
-				zoom: 2,
+				zoom: 9,
 				renderWorldCopies: false,
 				style: {
 					version: 8,
@@ -44,7 +44,8 @@
 								'https://moon-workers.infokukan.workers.dev/lroc_wac/{z}/{x}/{y}.png',
 							],
 							tileSize: 256,
-							maxzoom: 7,
+							minzoom :9,
+							maxzoom: 9,
 							attribution:
 								'USGS/NASA: <a href="https://astrogeology.usgs.gov/search/map/Moon/LRO/LROC_WAC/Lunar_LRO_LROC-WAC_Mosaic_global_100m_June2013">Surface</a> | <a href="https://planetarynames.wr.usgs.gov/Page/MOON/target">Crater</a> | <a href="https://pgda.gsfc.nasa.gov/products/54">DEM</a>',
 						},
@@ -114,7 +115,7 @@
 					],
 				},
 				maxPitch: 85,
-				maxZoom: 10,
+				maxZoom: 9,
 			});
 
 			map.addControl(new maplibregl.NavigationControl());

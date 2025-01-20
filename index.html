@@ -42,11 +42,12 @@
 							type: 'raster',
 							tiles: [
 								//'https://moon-workers.infokukan.workers.dev/lroc_wac/{z}/{y}/{x}.png',
-								'https://trek.nasa.gov/tiles/Moon/EQ/LRO_WAC_Mosaic_Global_303ppd_v02/1.0.0//default/default028mm/{y}/{x}/{z}.jpg',
+								'https://trek.nasa.gov/tiles/Moon/EQ/LRO_WAC_Mosaic_Global_303ppd_v02/1.0.0//default/default028mm/{z}/{x}/{y}.jpg',
 							],
 							tileSize: 256,
 							minzoom: 0,
 							maxzoom: 10,
+							tms: true,
 							attribution:
 								'USGS/NASA: <a href="https://astrogeology.usgs.gov/search/map/Moon/LRO/LROC_WAC/Lunar_LRO_LROC-WAC_Mosaic_global_100m_June2013">Surface</a> | <a href="https://planetarynames.wr.usgs.gov/Page/MOON/target">Crater</a> | <a href="https://pgda.gsfc.nasa.gov/products/54">DEM</a>',
 						},

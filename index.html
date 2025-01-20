@@ -1,128 +1,155 @@
 <!DOCTYPE html>
 <html>
-	<head>
-		<meta charset="utf-8" />
-		<title>moon map</title>
-		<meta
-			name="viewport"
-			content="initial-scale=1,maximum-scale=1,user-scalable=no"
-		/>
-		<script src="https://unpkg.com/maplibre-gl@^5.0.0/dist/maplibre-gl.js"></script>
-		<link
-			href="https://unpkg.com/maplibre-gl@^5.0.0/dist/maplibre-gl.css"
-			rel="stylesheet"
-		/>
-		<style>
-			body {
-				margin: 0;
-				padding: 0;
-				background-color: #222;
-			}
-			#map {
-				position: absolute;
-				top: 0;
-				bottom: 0;
-				width: 100%;
-			}
-		</style>
-	</head>
-	<body>
-		<div id="map"></div>
-		<script>
-			const map = new maplibregl.Map({
-				container: 'map',
-				zoom: 0,
-				renderWorldCopies: false,
-				style: {
-					version: 8,
-					projection: { type: 'globe' },
-					glyphs: 'https://mierune.github.io/fonts/{fontstack}/{range}.pbf',
-					sources: {
-						surface: {
-							type: 'raster',
-							tiles: [
-								//'https://moon-workers.infokukan.workers.dev/lroc_wac/{z}/{y}/{x}.png',
-								'https://trek.nasa.gov/tiles/Moon/EQ/LRO_WAC_Mosaic_Global_303ppd_v02/1.0.0//default/default028mm/{z}/{y}/{x}.jpg',
-							],
-							tileSize: 256,
-							minzoom: 0,
-							maxzoom: 10,
-							tms: true,
-							attribution:
-								'USGS/NASA: <a href="https://astrogeology.usgs.gov/search/map/Moon/LRO/LROC_WAC/Lunar_LRO_LROC-WAC_Mosaic_global_100m_June2013">Surface</a> | <a href="https://planetarynames.wr.usgs.gov/Page/MOON/target">Crater</a> | <a href="https://pgda.gsfc.nasa.gov/products/54">DEM</a>',
-						},
-						crater: {
-							type: 'geojson',
-							data: './cratername.geojson',
-						},
-					},
-					layers: [
-						{
-							id: 'surface',
-							type: 'raster',
-							source: 'surface',
-							paint: {
-								'raster-fade-duration': 0,
-							},
-						},
-						{
-							id: 'crater',
-							type: 'symbol',
-							source: 'crater',
-							layout: {
-								'text-field': ['get', 'name'],
-								'text-font': ['Metropolis Bold'],
-								'text-size': 15,
-							},
-							paint: {
-								'text-color': 'white',
-								'text-halo-color': 'black',
-								'text-halo-width': 1,
-							},
-							minzoom: 5,
-						},
-						{
-							id: 'crater-mid',
-							type: 'symbol',
-							source: 'crater',
-							layout: {
-								'text-field': ['get', 'name'],
-								'text-font': ['Metropolis Bold'],
-								'text-size': 17,
-							},
-							paint: {
-								'text-color': 'white',
-								'text-halo-color': 'black',
-								'text-halo-width': 1,
-							},
-							filter: ['>', ['get', 'diameter'], 100],
-							minzoom: 3.5,
-						},
-						{
-							id: 'crater-big',
-							type: 'symbol',
-							source: 'crater',
-							layout: {
-								'text-field': ['get', 'name'],
-								'text-font': ['Metropolis Bold'],
-								'text-size': 20,
-							},
-							paint: {
-								'text-color': 'white',
-								'text-halo-color': 'black',
-								'text-halo-width': 1,
-							},
-							filter: ['>', ['get', 'diameter'], 300],
-						},
-					],
-				},
-				maxPitch: 85,
-				maxZoom: 9,
-			});
+  <head>
+    <meta charset="utf-8" />
+    <title>moon map with search control</title>
+    <meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no" />
+    <!-- MapLibre GL JS -->
+    <script src="https://unpkg.com/maplibre-gl@^5.0.0/dist/maplibre-gl.js"></script>
+    <link
+      href="https://unpkg.com/maplibre-gl@^5.0.0/dist/maplibre-gl.css"
+      rel="stylesheet"
+    />
+    <!-- MapLibre Search Control CSS -->
+    <link
+      href="https://unpkg.com/@stadiamaps/maplibre-search-box/dist/style.css"
+      rel="stylesheet"
+    />
+    <style>
+      body {
+        margin: 0;
+        padding: 0;
+        background-color: #222;
+      }
+      #map {
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        width: 100%;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="map"></div>
 
-			map.addControl(new maplibregl.NavigationControl());
-			map.addControl(new maplibregl.FullscreenControl());
-			map.addControl(new maplibregl.LogoControl(), 'bottom-left');
-		</script>
-	</body>
+    <!-- スクリプトはモジュールとして読み込み -->
+    <script type="module">
+      // MapLibre Search Control を unpkg 経由で読み込み
+      import { MapLibreSearchControl } from "https://unpkg.com/@stadiamaps/maplibre-search-box@latest/dist/index.js";
+
+      // MapLibre GL のマップ定義
+      const map = new maplibregl.Map({
+        container: "map",
+        zoom: 0,
+        renderWorldCopies: false,
+        style: {
+          version: 8,
+          projection: { type: "globe" },
+          glyphs: "https://mierune.github.io/fonts/{fontstack}/{range}.pbf",
+          sources: {
+            surface: {
+              type: "raster",
+              tiles: [
+                // 'https://moon-workers.infokukan.workers.dev/lroc_wac/{z}/{y}/{x}.png',
+                "https://trek.nasa.gov/tiles/Moon/EQ/LRO_WAC_Mosaic_Global_303ppd_v02/1.0.0//default/default028mm/{z}/{y}/{x}.jpg",
+              ],
+              tileSize: 256,
+              minzoom: 0,
+              maxzoom: 10,
+              tms: true,
+              attribution:
+                'USGS/NASA: <a href="https://astrogeology.usgs.gov/search/map/Moon/LRO/LROC_WAC/Lunar_LRO_LROC-WAC_Mosaic_global_100m_June2013">Surface</a> | <a href="https://planetarynames.wr.usgs.gov/Page/MOON/target">Crater</a> | <a href="https://pgda.gsfc.nasa.gov/products/54">DEM</a>',
+            },
+            crater: {
+              type: "geojson",
+              data: "./cratername.geojson",
+            },
+          },
+          layers: [
+            {
+              id: "surface",
+              type: "raster",
+              source: "surface",
+              paint: {
+                "raster-fade-duration": 0,
+              },
+            },
+            {
+              id: "crater",
+              type: "symbol",
+              source: "crater",
+              layout: {
+                "text-field": ["get", "name"],
+                "text-font": ["Metropolis Bold"],
+                "text-size": 15,
+              },
+              paint: {
+                "text-color": "white",
+                "text-halo-color": "black",
+                "text-halo-width": 1,
+              },
+              minzoom: 5,
+            },
+            {
+              id: "crater-mid",
+              type: "symbol",
+              source: "crater",
+              layout: {
+                "text-field": ["get", "name"],
+                "text-font": ["Metropolis Bold"],
+                "text-size": 17,
+              },
+              paint: {
+                "text-color": "white",
+                "text-halo-color": "black",
+                "text-halo-width": 1,
+              },
+              filter: [">", ["get", "diameter"], 100],
+              minzoom: 3.5,
+            },
+            {
+              id: "crater-big",
+              type: "symbol",
+              source: "crater",
+              layout: {
+                "text-field": ["get", "name"],
+                "text-font": ["Metropolis Bold"],
+                "text-size": 20,
+              },
+              paint: {
+                "text-color": "white",
+                "text-halo-color": "black",
+                "text-halo-width": 1,
+              },
+              filter: [">", ["get", "diameter"], 300],
+            },
+          ],
+        },
+        maxPitch: 85,
+        maxZoom: 9,
+      });
+
+      // マップコントロールの追加
+      map.addControl(new maplibregl.NavigationControl());
+      map.addControl(new maplibregl.FullscreenControl());
+      map.addControl(new maplibregl.LogoControl(), "bottom-left");
+
+      // MapLibre Search Control の設定
+      const searchControl = new MapLibreSearchControl({
+        onResultSelected: feature => {
+          console.log("選択された地点の座標: ", feature.geometry.coordinates);
+          // 例: 結果選択時にその地点にズームする場合
+          map.flyTo({
+            center: feature.geometry.coordinates,
+            zoom: 5,
+          });
+        },
+        // EU のエンドポイントを利用したい場合は以下のコメント解除
+        // baseUrl: "https://api-eu.stadiamaps.com",
+      });
+
+      // マップに検索ボックスを追加（画面左上に表示）
+      map.addControl(searchControl, "top-left");
+    </script>
+  </body>
 </html>

@@ -125,15 +125,25 @@
 
 			// 画像を追加
 			map.on('load', function () {
+			// 画像を追加
+			map.addImage('space-pattern', 'https://ratescale.github.io/moon-maplibre-view/space.jpg', function (error) {
+				if (error) {
+					console.error('Failed to load image:', error);
+					return;
+					}
+
+				// 背景にパターンを設定
 				map.addLayer({
 					id: 'background',
 					type: 'background',
 					paint: {
 						'background-color': 'black',
-						'background-pattern': 'https://ratescale.github.io/moon-maplibre-view/space.jpg' // 背景画像のパス
+						'background-pattern': 'space-pattern' // 登録した画像名を指定
 					}
+					});
 				});
 			});
+
 
 
 

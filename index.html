@@ -120,45 +120,6 @@
 				maxZoom: 9,
 			});
 
-			const aspectRatio = 6000 / 4000;
-			const maxLat = 90 / aspectRatio;
-
-			map.on('load', async function () {
-			// 背景画像を追加
-			try {
-				// 画像を登録
-				await new Promise((resolve, reject) => {
-					map.loadImage(
-						'https://ratescale.github.io/moon-maplibre-view/space.jpg',
-						(error, image) => {
-							if (error) {
-								reject(error);
-								return;
-							}
-							map.addImage('space-pattern', image);
-							resolve();
-						}
-					);
-				});
-
-				// 背景レイヤーを追加
-				map.addLayer({
-					id: 'background',
-					type: 'background',
-					paint: {
-						'background-color': 'black',
-						'background-pattern': 'space-pattern', // 登録した画像を参照
-					},
-				});
-			} catch (error) {
-				console.error('Failed to load the background image:', error);
-			}
-		});
-
-
-
-
-
 			map.addControl(new maplibregl.NavigationControl());
 			map.addControl(new maplibregl.FullscreenControl());
 			map.addControl(new maplibregl.LogoControl(), 'bottom-left');

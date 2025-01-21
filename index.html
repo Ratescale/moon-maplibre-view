@@ -120,16 +120,19 @@
 				maxZoom: 9,
 			});
 
+			const aspectRatio = 6000 / 4000;
+			const maxLat = 90 / aspectRatio;
+
 			// 画像を追加
 			map.on('load', function () {
 			map.addSource('background-image', {
 				type: 'image',
 				url: 'https://ratescale.github.io/moon-maplibre-view/space.jpg',
 				coordinates: [
-				[-180, 90],  // 左上
-				[180, 90],   // 右上
-				[180, -90],  // 右下
-				[-180, -90]  // 左下
+				[-180, maxLat],  // 左上
+				[180, maxLat],   // 右上
+				[180, -maxLat],  // 右下
+				[-180, -maxLat]  // 左下
 				]
 			});
 

@@ -120,6 +120,31 @@
 				maxZoom: 9,
 			});
 
+			// 画像を追加
+			map.on('load', function () {
+			map.addSource('background-image', {
+				type: 'image',
+				url: '/space.jpg',
+				coordinates: [
+				[-180, 90],  // 左上
+				[180, 90],   // 右上
+				[180, -90],  // 右下
+				[-180, -90]  // 左下
+				]
+			});
+
+			// レイヤーとして追加
+			map.addLayer({
+				id: 'background',
+				type: 'raster',
+				source: 'background-image',
+				paint: {
+				'raster-opacity': 0.9 // 透明度調整
+				}
+			});
+			});
+
+
 			map.addControl(new maplibregl.NavigationControl());
 			map.addControl(new maplibregl.FullscreenControl());
 			map.addControl(new maplibregl.LogoControl(), 'bottom-left');
